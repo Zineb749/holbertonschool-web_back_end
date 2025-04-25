@@ -1,1 +1,1 @@
-async functions
+async function
