@@ -1,35 +1,39 @@
 const fs = require('fs');
 
 function countStudents(path) {
+  let data;
   try {
-    const data = fs.readFileSync(path, 'utf8');
-    const lines = data.trim().split('\n');
-    const studentsByField = {};
-    let totalStudents = 0;
-
-    for (const line of lines.slice(1)) {
-      const fields = line.split(',');
-      if (fields.length === 4) {
-        const firstName = fields[0].trim();
-        const field = fields[3].trim();
-        if (!studentsByField[field]) {
-          studentsByField[field] = [];
-        }
-        studentsByField[field].push(firstName);
-        totalStudents += 1;
-      }
-    }
-
-    console.log(`Number of students: ${totalStudents}`);
-    for (const field in studentsByField) {
-      if (Object.prototype.hasOwnProperty.call(studentsByField, field)) {
-        const students = studentsByField[field];
-        console.log(`Number of students in ${field}: ${students.length}. List: ${students.join(', ')}`);
-      }
-    }
-  } catch (err) {
+    data = fs.readFileSync(path, 'utf-8');
+  } catch (error) {
     throw new Error('Cannot load the database');
   }
+
+  const lines = data.split('\n').filter(line => line.trim() !== '');
+  const headers = lines.shift().split(',');
+
+  // We'll group students by field (last column), collecting first names
+  const fields = {};
+
+  lines.forEach((line) => {
+    const columns = line.split(',');
+    if (columns.length < headers.length) return; // skip invalid lines
+
+    const firstName = columns[0].trim();
+    const field = columns[headers.length - 1].trim();
+
+    if (!fields[field]) {
+      fields[field] = [];
+    }
+    fields[field].push(firstName);
+  });
+
+  const totalStudents = Object.values(fields).reduce((acc, arr) => acc + arr.length, 0);
+
+  console.log(`Number of students: ${totalStudents}`);
+
+  Object.keys(fields).forEach((field) => {
+    console.log(`Number of students in ${field}: ${fields[field].length}. List: ${fields[field].join(', ')}`);
+  });
 }
 
 module.exports = countStudents;
