@@ -8,7 +8,7 @@ function countStudents(path) {
     throw new Error('Cannot load the database');
   }
 
-  const lines = data.split('\n').filter(line => line.trim() !== '');
+  const lines = data.split('\n').filter((line) => line.trim() !== '');
   const headers = lines.shift().split(',');
 
   // We'll group students by field (last column), collecting first names
